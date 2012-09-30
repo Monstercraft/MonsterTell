@@ -1,0 +1,16 @@
+name: MonsterTell
+main: org.monstercraft.info.MonsterTell
+version: 1.0
+author: Fletch_to_99
+description: A simple way of forcing your players to tell you how they found your server.
+commands:
+  tell:
+    description: Tell the owner how you found their server.
+    usage: /tell
+  tellreload:
+    description: Reload the rewards.
+    usage: /tellreload
+permissions:
+  monstertell.reload:
+    description: Reload the rewards.
+    default: op
