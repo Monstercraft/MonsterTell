@@ -23,79 +23,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * This class represents the main plugin. All actions related to the plugin are forwarded by this class
- * 
+ *
  * @author Fletch_to_99 <fletchto99@hotmail.com>
- * 
+ *
  */
 public class MonsterTell extends JavaPlugin implements Listener {
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerJoin(final PlayerJoinEvent event) {
-        final Player player = event.getPlayer();
-        if (player.getLastPlayed() == 0) {
-            player.sendMessage(ChatColor.BLUE
-                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
-            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
-                    + "\"/tell (message)\"" + ChatColor.BLUE
-                    + " and get some rewards!");
-            blocked_players.add(player.getName());
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerTeleport(final PlayerTeleportEvent event) {
-        final Player player = event.getPlayer();
-        if (blocked_players.contains(player.getName())) {
-            player.sendMessage(ChatColor.BLUE
-                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
-            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
-                    + "\"/tell (message)\"" + ChatColor.BLUE
-                    + " and get some rewards!");
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerInteract(final PlayerInteractEvent event) {
-        final Player player = event.getPlayer();
-        if (blocked_players.contains(player.getName())) {
-            player.sendMessage(ChatColor.BLUE
-                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
-            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
-                    + "\"/tell (message)\"" + ChatColor.BLUE
-                    + " and get some rewards!");
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerChat(final AsyncPlayerChatEvent event) {
-        final Player player = event.getPlayer();
-        if (blocked_players.contains(player.getName())) {
-            player.sendMessage(ChatColor.BLUE
-                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
-            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
-                    + "\"/tell (message)\"" + ChatColor.BLUE
-                    + " and get some rewards!");
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
-        if (event.getMessage().startsWith("/tell")) {
-            return;
-        }
-        final Player player = event.getPlayer();
-        if (blocked_players.contains(player.getName())) {
-            player.sendMessage(ChatColor.BLUE
-                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
-            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
-                    + "\"/tell (message)\"" + ChatColor.BLUE
-                    + " and get some rewards!");
-            event.setCancelled(true);
-        }
-    }
 
     private final ArrayList<String> blocked_players = new ArrayList<String>();
 
@@ -104,29 +36,6 @@ public class MonsterTell extends JavaPlugin implements Listener {
     private int id = 0;
 
     private int amount = 0;
-
-    @Override
-    public void onEnable() {
-        if (!new File(getDataFolder(), "config.yml").exists()) {
-            saveDefaultConfig();
-        }
-        id = getConfig().getInt("ID");
-        amount = getConfig().getInt("AMOUNT");
-        file = new File(getDataFolder(), "Messages.txt");
-        if (!file.exists()) {
-            new File(file.getParent()).mkdirs();
-            try {
-                file.createNewFile();
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        }
-        getServer().getPluginManager().registerEvents(this, this);
-        try {
-            new Metrics(this).start();
-        } catch (final IOException e) {
-        }
-    }
 
     /**
      * Handles commands.
@@ -173,12 +82,13 @@ public class MonsterTell extends JavaPlugin implements Listener {
         } else if (label.equalsIgnoreCase("tellreload")) {
             if (sender.hasPermission("monstertell.reload")) {
                 try {
-                    getConfig().load(new File(getDataFolder(), "config.yml"));
+                    this.getConfig().load(
+                            new File(this.getDataFolder(), "config.yml"));
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }
-                id = getConfig().getInt("ID");
-                amount = getConfig().getInt("AMOUNT");
+                id = this.getConfig().getInt("ID");
+                amount = this.getConfig().getInt("AMOUNT");
                 sender.sendMessage(ChatColor.GREEN
                         + "Successfully reloaded the rewards!");
                 return true;
@@ -186,5 +96,96 @@ public class MonsterTell extends JavaPlugin implements Listener {
             sender.sendMessage(ChatColor.RED + "You don't have permissions!");
         }
         return true;
+    }
+
+    @Override
+    public void onEnable() {
+        if (!new File(this.getDataFolder(), "config.yml").exists()) {
+            this.saveDefaultConfig();
+        }
+        id = this.getConfig().getInt("ID");
+        amount = this.getConfig().getInt("AMOUNT");
+        file = new File(this.getDataFolder(), "Messages.txt");
+        if (!file.exists()) {
+            new File(file.getParent()).mkdirs();
+            try {
+                file.createNewFile();
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+        }
+        this.getServer().getPluginManager().registerEvents(this, this);
+        try {
+            new Metrics(this).start();
+        } catch (final IOException e) {
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerChat(final AsyncPlayerChatEvent event) {
+        final Player player = event.getPlayer();
+        if (blocked_players.contains(player.getName())) {
+            player.sendMessage(ChatColor.BLUE
+                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
+            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
+                    + "\"/tell (message)\"" + ChatColor.BLUE
+                    + " and get some rewards!");
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
+        if (event.getMessage().startsWith("/tell")) {
+            return;
+        }
+        final Player player = event.getPlayer();
+        if (blocked_players.contains(player.getName())) {
+            player.sendMessage(ChatColor.BLUE
+                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
+            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
+                    + "\"/tell (message)\"" + ChatColor.BLUE
+                    + " and get some rewards!");
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerInteract(final PlayerInteractEvent event) {
+        final Player player = event.getPlayer();
+        if (blocked_players.contains(player.getName())) {
+            player.sendMessage(ChatColor.BLUE
+                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
+            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
+                    + "\"/tell (message)\"" + ChatColor.BLUE
+                    + " and get some rewards!");
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerJoin(final PlayerJoinEvent event) {
+        final Player player = event.getPlayer();
+        if (player.getLastPlayed() == 0) {
+            player.sendMessage(ChatColor.BLUE
+                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
+            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
+                    + "\"/tell (message)\"" + ChatColor.BLUE
+                    + " and get some rewards!");
+            blocked_players.add(player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerTeleport(final PlayerTeleportEvent event) {
+        final Player player = event.getPlayer();
+        if (blocked_players.contains(player.getName())) {
+            player.sendMessage(ChatColor.BLUE
+                    + "You must tell the owner how you found this server before you can play! Use /tell (message)");
+            player.sendMessage(ChatColor.BLUE + "Use" + ChatColor.AQUA
+                    + "\"/tell (message)\"" + ChatColor.BLUE
+                    + " and get some rewards!");
+            event.setCancelled(true);
+        }
     }
 }
